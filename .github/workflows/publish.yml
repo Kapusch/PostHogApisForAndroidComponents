@@ -6,6 +6,9 @@ permissions:
 jobs:
   publish:
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -26,9 +29,13 @@ jobs:
         with:
           name: native-sdk-qualification
           path: artifacts/nuget/*.nupkg
+      - name: Authenticate to NuGet.org with OIDC
+        uses: NuGet/login@v1
+        id: nuget_login
+        with:
+          user: Kapusch
       - name: Publish to NuGet.org
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
         run: |
-          test -n "$NUGET_API_KEY" || { echo 'Configure repository NUGET_API_KEY before publishing.'; exit 1; }
           dotnet nuget push artifacts/nuget/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
