@@ -1,0 +1,34 @@
+name: Publish verified NuGet package
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: dotnet workload install android --version 10.0.203
+      - run: python3 scripts/verify-public.py
+      - run: bash src/Kapusch.PostHogApisForAndroidComponents/Native/Android/build.sh
+      - run: dotnet pack src/Kapusch.PostHogApisForAndroidComponents/Kapusch.PostHogApisForAndroidComponents.csproj -c Release -o artifacts/nuget
+      - run: python3 scripts/verify-package.py
+      - run: dotnet build samples/Smoke/Smoke.csproj -c Release 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-sdk-qualification
+          path: artifacts/nuget/*.nupkg
+      - name: Publish to NuGet.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          test -n "$NUGET_API_KEY" || { echo 'Configure repository NUGET_API_KEY before publishing.'; exit 1; }
+          dotnet nuget push artifacts/nuget/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
