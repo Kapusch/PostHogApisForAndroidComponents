@@ -23,3 +23,15 @@ JNI calls resolved and anonymous ID remained unchanged after force-stop/relaunch
 A loopback endpoint prevents data submission; server delivery and queue recovery
 remain separate gates. Clean GitHub Actions native build, pack, package-layout
 checks and optimized Release consumer build passed.
+
+## Offline restart recovery prerequisite
+
+The native dependency is pinned to 3.38.2. Upstream 3.36.1 loads cached disk
+files into the live queue at startup, and 3.38.0 flushes when connectivity returns.
+Earlier 3.22.0 performed a one-time cached-file send that could be skipped at
+an offline startup. Disk persistence alone is not a delivery guarantee.
+Keep the wrapper thin: no custom queue or calls to internal SDK recovery APIs.
+Requalify offline capture, process termination, offline restart and reconnection
+on a device before claiming delivery support for this package.
+
+Source: https://github.com/PostHog/posthog-android/blob/main/posthog-android/CHANGELOG.md

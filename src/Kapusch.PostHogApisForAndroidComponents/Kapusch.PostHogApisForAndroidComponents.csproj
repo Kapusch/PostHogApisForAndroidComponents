@@ -3,7 +3,7 @@
   <TargetFramework>net10.0-android</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
   <DefaultItemExcludes>$(DefaultItemExcludes);Native/**</DefaultItemExcludes>
   <PackageId>Kapusch.PostHog.Android</PackageId><AssemblyName>Kapusch.PostHog.Android</AssemblyName><Authors>Kapusch</Authors>
-  <Version>0.1.0</Version><Description>Thin JNI interop for the official PostHog Android SDK with native disk persistence.</Description>
+  <Version>0.1.1</Version><Description>Thin JNI interop for the official PostHog Android SDK with native disk persistence.</Description>
   <PackageLicenseExpression>MIT</PackageLicenseExpression><RepositoryUrl>https://github.com/Kapusch/PostHogApisForAndroidComponents</RepositoryUrl>
   <PackageReadmeFile>nuget-readme.md</PackageReadmeFile><NoWarn>$(NoWarn);NU5128</NoWarn>
  </PropertyGroup>
@@ -24,6 +24,6 @@
  </ItemGroup>
  <Target Name="ValidateNativeAssets" BeforeTargets="GenerateNuspec">
   <Error Condition="!Exists('Native/Android/build/aar/kposthog-release.aar')" Text="Build native wrapper before packing."/>
-  <Error Condition="!Exists('Native/Android/build/deps/posthog-3.22.0.jar')" Text="Missing pinned native SDK dependencies."/>
+  <Error Condition="!Exists('Native/Android/build/deps/posthog-6.8.1.jar')" Text="Missing pinned native SDK dependencies."/>
  </Target>
 </Project>
