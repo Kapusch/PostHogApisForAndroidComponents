@@ -12,7 +12,7 @@ See [integration](Docs/Integration.md), [source builds](Docs/SourceMode.md),
 [qualification](Docs/Qualification.md), [samples](samples/README.md) and
 [third-party licenses](THIRD_PARTY_NOTICES.md).
 
-Build native artifacts, then:
+Build native artifacts with `bash src/Kapusch.PostHogApisForAndroidComponents/Native/Android/build.sh`, then:
 
 ```sh
 dotnet pack src/Kapusch.PostHogApisForAndroidComponents/Kapusch.PostHogApisForAndroidComponents.csproj

@@ -2,6 +2,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$ROOT/../../../.." && pwd)"
+mkdir -p "$REPO/artifacts/nuget"
 SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}"
 [[ -d "$SDK" ]] || { echo 'Android SDK is required' >&2; exit 1; }
 export GRADLE_USER_HOME="${GRADLE_USER_HOME:-$ROOT/.gradle/user-home}"
