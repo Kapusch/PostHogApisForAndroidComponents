@@ -21,7 +21,7 @@ jobs:
       - run: bash src/Kapusch.PostHogApisForAndroidComponents/Native/Android/build.sh
       - run: dotnet pack src/Kapusch.PostHogApisForAndroidComponents/Kapusch.PostHogApisForAndroidComponents.csproj -c Release -o artifacts/nuget
       - run: python3 scripts/verify-package.py
-      - run: dotnet build samples/Smoke/Smoke.csproj -c Release 
+      - run: dotnet build samples/Smoke/Smoke.csproj -c Release
       - uses: actions/upload-artifact@v4
         with:
           name: native-sdk-qualification
