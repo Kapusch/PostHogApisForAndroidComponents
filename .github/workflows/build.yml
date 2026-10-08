@@ -18,7 +18,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - run: dotnet workload install android
+      - run: dotnet workload install android --version 10.0.203
       - run: python3 scripts/verify-public.py
       - run: bash src/Kapusch.PostHogApisForAndroidComponents/Native/Android/build.sh
       - run: dotnet pack src/Kapusch.PostHogApisForAndroidComponents/Kapusch.PostHogApisForAndroidComponents.csproj -c Release -o artifacts/nuget
