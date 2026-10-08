@@ -17,3 +17,9 @@ Native compilation and packed NuGet Release sample build passed locally on
 SDK 35, Java 17-compatible bytecode, optimized .NET Android consumer.
 This proves package linking only; phone ingestion/restart/identity tests remain
 pending. No NuGet.org publication or production readiness is claimed.
+
+Runtime Release sample passed on Android emulator: setup/capture/flush/distinct ID
+JNI calls resolved and anonymous ID remained unchanged after force-stop/relaunch.
+A loopback endpoint prevents data submission; server delivery and queue recovery
+remain separate gates. Clean GitHub Actions native build, pack, package-layout
+checks and optimized Release consumer build passed.
