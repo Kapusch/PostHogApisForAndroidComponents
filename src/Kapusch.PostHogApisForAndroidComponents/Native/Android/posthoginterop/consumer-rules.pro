@@ -1,0 +1,2 @@
+-keep class com.kapusch.posthog.androidinterop.PostHogInterop { public static *; }
+-keep class kotlin.Metadata { *; }

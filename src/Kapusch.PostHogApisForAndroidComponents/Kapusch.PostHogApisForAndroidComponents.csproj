@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+  <TargetFramework>net10.0-android</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+  <DefaultItemExcludes>$(DefaultItemExcludes);Native/**</DefaultItemExcludes>
+  <PackageId>Kapusch.PostHog.Android</PackageId><AssemblyName>Kapusch.PostHog.Android</AssemblyName><Authors>Kapusch</Authors>
+  <Version>0.1.0</Version><Description>Thin JNI interop for the official PostHog Android SDK with native disk persistence.</Description>
+  <PackageLicenseExpression>MIT</PackageLicenseExpression><RepositoryUrl>https://github.com/Kapusch/PostHogApisForAndroidComponents</RepositoryUrl>
+  <PackageReadmeFile>nuget-readme.md</PackageReadmeFile><NoWarn>$(NoWarn);NU5128</NoWarn>
+ </PropertyGroup>
+ <ItemGroup>
+  <AndroidLibrary Remove="Native/**"/><AndroidAarLibrary Remove="Native/**"/><AndroidJavaSource Remove="Native/**"/>
+  <None Remove="Native/**"/><Content Remove="Native/**"/>
+  <PackageReference Include="Xamarin.Kotlin.StdLib" Version="2.3.10.1"/>
+  <PackageReference Include="Xamarin.AndroidX.Core" Version="1.17.0.2"/>
+  <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.10.0.1"/>
+  <PackageReference Include="GoogleGson" Version="2.13.1.1"/>
+  <PackageReference Include="Square.OkHttp3" Version="4.12.0.7"/>
+  <None Include="buildTransitive/**" Pack="true" PackagePath="buildTransitive/"/>
+  <None Include="nuget-readme.md" Pack="true" PackagePath="/"/>
+  <None Include="../../THIRD_PARTY_NOTICES.md" Pack="true" PackagePath="/"/>
+  <None Include="../../ThirdPartyLicenses/**" Pack="true" PackagePath="licenses/"/>
+  <None Include="Native/Android/build/aar/*.aar" Pack="true" PackagePath="native/aar/"/>
+  <None Include="Native/Android/build/deps/*" Pack="true" PackagePath="native/deps/"/>
+ </ItemGroup>
+ <Target Name="ValidateNativeAssets" BeforeTargets="GenerateNuspec">
+  <Error Condition="!Exists('Native/Android/build/aar/kposthog-release.aar')" Text="Build native wrapper before packing."/>
+  <Error Condition="!Exists('Native/Android/build/deps/posthog-3.22.0.jar')" Text="Missing pinned native SDK dependencies."/>
+ </Target>
+</Project>

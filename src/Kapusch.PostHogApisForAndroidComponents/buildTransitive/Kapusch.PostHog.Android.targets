@@ -1,0 +1,14 @@
+<Project>
+ <PropertyGroup>
+  <_KapuschPostHogNativeRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../native'))</_KapuschPostHogNativeRoot>
+  <_KapuschPostHogNativeRoot Condition="'$(UseKapuschPostHogAndroidInteropFromSource)' == 'true'">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../Native/Android/build'))</_KapuschPostHogNativeRoot>
+ </PropertyGroup>
+ <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+  <AndroidLibrary Include="$(_KapuschPostHogNativeRoot)/aar/kposthog-release.aar" Bind="false"/>
+  <AndroidLibrary Include="$(_KapuschPostHogNativeRoot)/deps/*" Bind="false"/>
+ </ItemGroup>
+ <Target Name="ValidatePostHogAndroidConsumer" BeforeTargets="_ResolveLibraryProjectImports" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+  <Error Condition="!Exists('$(_KapuschPostHogNativeRoot)/aar/kposthog-release.aar')" Text="Missing PostHog native wrapper."/>
+  <Error Condition="!Exists('$(_KapuschPostHogNativeRoot)/deps/posthog-3.22.0.jar')" Text="Missing pinned PostHog native SDK."/>
+ </Target>
+</Project>
