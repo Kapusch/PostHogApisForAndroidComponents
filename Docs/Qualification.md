@@ -35,3 +35,12 @@ Requalify offline capture, process termination, offline restart and reconnection
 on a device before claiming delivery support for this package.
 
 Source: https://github.com/PostHog/posthog-android/blob/main/posthog-android/CHANGELOG.md
+
+## Manual publication
+
+After device qualification, configure repository Actions secret NUGET_API_KEY
+scoped to this package on NuGet.org. Run Publish verified NuGet package on main.
+The workflow rebuilds, scans, packs and links a consumer before publishing the
+version declared in the project. Never overwrite a published version; increment
+the project and sample versions for subsequent releases. No publication runs
+automatically on push. Device qualification remains a human-reviewed prerequisite.
