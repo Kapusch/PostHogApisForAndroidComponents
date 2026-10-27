@@ -9,6 +9,8 @@ import org.json.JSONArray
 
 /** Thin JNI surface; the upstream SDK owns the disk queue and lifecycle. */
 object PostHogInterop {
+ /** Orders reset() against optIn()/optOut(); always taken before any upstream lock. */
+ private val consentLock = Any()
  /**
   * [optOut] is the consent state used until a persisted runtime choice is read (or always, when
   * [persistOptOut] is false). `persistOptOut` is annotated `@PostHogInternal` upstream (since
@@ -48,17 +50,20 @@ object PostHogInterop {
   * Upstream reset() clears every stored value except a fixed list that does not include the
   * persisted opt-out, so a later launch would fall back to the setup default. Re-apply an active
   * opt-out after the reset so consent withdrawal survives logout (fail closed). An opted-in state is
-  * not re-persisted: it falls back to the setup default instead.
+  * not re-persisted: it falls back to the setup default instead. Runs under [consentLock] so a
+  * concurrent optIn()/optOut() cannot land between the read and the re-applied opt-out.
   */
  @JvmStatic fun reset() {
-  val optedOut = PostHog.isOptOut()
-  PostHog.reset()
-  if (optedOut) PostHog.optOut()
+  synchronized(consentLock) {
+   val optedOut = PostHog.isOptOut()
+   PostHog.reset()
+   if (optedOut) PostHog.optOut()
+  }
  }
  @JvmStatic fun flush() { PostHog.flush() }
  @JvmStatic fun distinctId(): String = PostHog.distinctId()
- @JvmStatic fun optIn() { PostHog.optIn() }
- @JvmStatic fun optOut() { PostHog.optOut() }
+ @JvmStatic fun optIn() { synchronized(consentLock) { PostHog.optIn() } }
+ @JvmStatic fun optOut() { synchronized(consentLock) { PostHog.optOut() } }
  @JvmStatic fun isOptOut(): Boolean = PostHog.isOptOut()
  private fun map(json: JSONObject): Map<String, Any> = json.keys().asSequence().associateWith { value(json.get(it)) }
  private fun value(v: Any): Any = when (v) {
