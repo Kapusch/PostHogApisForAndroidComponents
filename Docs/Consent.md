@@ -62,7 +62,7 @@ recorded.
 ```csharp
 NativePostHog.Configure(context, "phc_example", "https://eu.i.posthog.com",
     new NativePostHogOptions { OptOut = true });
-// later, once the user consents:
+// later, once the user consents, and again after every Reset() while consent stands:
 NativePostHog.OptIn();
 ```
 
@@ -87,12 +87,18 @@ nothing to merge.
 
 **Persisted choice (`PersistOptOut = true`, default).** `OptIn()` and `OptOut()`
 are written to disk. The stored value outranks `OptOut` from the next setup on.
-It is read at the first consent check once storage is readable. An app can
-therefore pass `OptOut = true` at every launch and call `OptIn()` once.
+It is read at the first consent check once storage is readable. A stored opt-in
+does **not** survive `Reset()` (see [Reset caveat](#reset-caveat)): after a
+logout, the next launch falls back to the `OptOut` setup value. An app that
+passes `OptOut = true` must therefore keep its own consent record and call
+`OptIn()` again after every `Reset()`, or simply on every launch while consent
+stands. Otherwise analytics silently stop for a user who consented and later
+logged out.
 
-**App-owned consent (`PersistOptOut = false`).** Pass `OptOut = !hasConsent`
-from your own store at every launch. `OptIn()` and `OptOut()` then change only
-the running process. Upstream marks `persistOptOut` as `@PostHogInternal`. It
+**App-owned consent (`PersistOptOut = false`).** Recommended when the app
+already stores consent. Pass `OptOut = !hasConsent` from your own store at
+every launch. `OptIn()` and `OptOut()` then change only the running process,
+and `Reset()` has no consent effect beyond it. Upstream marks `persistOptOut` as `@PostHogInternal`. It
 was added in 3.66.0 for wrapper SDKs that own consent, and it carries no
 upstream stability guarantee. The wrapper pins the SDK version, so check this
 property on every bump.
@@ -123,7 +129,8 @@ The wrapper's `Reset()` handles this. If the SDK is opted out at call time, it
 calls `optOut()` again after the reset, which rewrites the stored value. This
 wrapper behavior differs from upstream and fails closed. An opted-in state is not
 rewritten. It falls back to the setup default, so an app that starts with
-`OptOut = true` asks again or restores consent from its own store. A process
+`OptOut = true` must call `OptIn()` again from its own consent record after
+`Reset()` (see [persisted choice](#start-disabled-enable-after-consent)). A process
 kill between the two calls would lose the rewrite.
 
 `Reset()` creates a new anonymous ID and reloads flags (see above). The device
