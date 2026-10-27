@@ -11,13 +11,17 @@ import org.json.JSONArray
 object PostHogInterop {
  @JvmStatic fun setup(context: Context, key: String, host: String, debug: Boolean, lifecycle: Boolean) {
   require(key.startsWith("phc_") && android.net.Uri.parse(host).scheme == "https")
-  val config = PostHogAndroidConfig(key, host)
+  val config = PostHogAndroidConfig(projectToken = key, host = host)
   config.debug = debug
   config.captureApplicationLifecycleEvents = lifecycle
   config.captureScreenViews = false
   config.captureDeepLinks = false
   config.preloadFeatureFlags = false
   config.sessionReplay = false
+  // Push token registration and open capture are on upstream and auto-arm when Firebase Messaging
+  // is on the classpath. This wrapper neither exposes nor qualifies them.
+  config.capturePushNotificationSubscriptions = false
+  config.capturePushNotificationOpened = false
   config.flushAt = 20
   config.maxQueueSize = 1000
   config.flushIntervalSeconds = 5
