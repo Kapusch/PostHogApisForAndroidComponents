@@ -12,4 +12,6 @@ with zipfile.ZipFile(packages[0]) as archive:
  assert "native/deps/posthog-6.47.7.jar" in names and "native/deps/curtains-1.2.5.aar" in names
  assert "native/deps/posthog-android-3.73.1.aar" in names
  assert not any("/spm/" in n or "/.gradle/" in n for n in names)
+ nuspec = archive.read(next(n for n in names if n.endswith(".nuspec"))).decode()
+ assert "<releaseNotes>" in nuspec, "Missing PackageReleaseNotes"
 print("Package layout verified")
