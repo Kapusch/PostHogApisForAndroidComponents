@@ -25,12 +25,13 @@ production and redact before sharing.
 Kapusch.PostHog.Android.NativePostHog.Configure(applicationContext, "phc_example", "https://eu.i.posthog.com",
     new Kapusch.PostHog.Android.NativePostHogOptions { OptOut = true });
 Kapusch.PostHog.Android.NativePostHog.OptIn(); // once the user consents
-Kapusch.PostHog.Android.NativePostHog.Capture("practice_credit_recorded", "{\"session_id\":\"example\"}");
+Kapusch.PostHog.Android.NativePostHog.Capture("item_completed", "{\"item_id\":\"example\"}");
 Kapusch.PostHog.Android.NativePostHog.Identify("account-example");
 Kapusch.PostHog.Android.NativePostHog.Reset();
 ```
 
 Properties are a JSON object. Omit missing properties rather than sending JSON
 nulls (unsupported by this Android surface). Event capture time is the SDK time;
-keep business completion time in a separate UTC property for deferred credits.
+keep business completion time in a separate UTC property for events recorded
+later than they happened.
 SDK lifetime is process-wide: configure once before using this singleton API.
