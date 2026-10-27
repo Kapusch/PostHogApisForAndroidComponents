@@ -10,7 +10,9 @@ later. See [consent and opt-out](Consent.md) for first-launch state, withdrawal
 and the reset caveat.
 
 Use native anonymous identity until sign-in; identify with a stable account ID.
-Call Reset on logout and before direct account A to B transitions. Never identify
+Call Reset on logout and before direct account A to B transitions. Reset keeps
+an opt-out but clears a persisted opt-in: if the app starts opted out, call
+OptIn again after Reset while its own consent record says yes. Never identify
 one account as another. Persist business event IDs to deduplicate downstream.
 Flush requests sending; it does not await or prove ingestion. OptOut stops new
 capture but does not purge queued events. Auto screen capture, replay, push,
