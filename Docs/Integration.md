@@ -14,8 +14,9 @@ Call Reset on logout and before direct account A to B transitions. Never identif
 one account as another. Persist business event IDs to deduplicate downstream.
 Flush requests sending; it does not await or prove ingestion. OptOut stops new
 capture but does not purge queued events. Auto screen capture, replay, push,
-remote config and feature flags are disabled; lifecycle capture is
-configurable. SDK debug logs may contain event properties; disable in
+remote config and feature flag preloading are disabled; Identify and Reset still
+send a feature flag request, even while opted out (see [consent](Consent.md)).
+Lifecycle capture is configurable. SDK debug logs may contain event properties; disable in
 production and redact before sharing.
 
 ## API example

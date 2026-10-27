@@ -25,9 +25,11 @@ pass `OptOut = true`.
 These always happen at `Configure`, whether the SDK is opted out or not:
 
 - It creates the private SharedPreferences file `posthog-android-<project key>`,
-  then generates and stores an anonymous ID (UUIDv7) and a device ID derived
-  from it. In Direct Boot, before the first unlock, both stay in memory until
-  storage can be read.
+  then generates and stores an anonymous ID (UUIDv7) and a device ID equal to
+  that first anonymous ID. The device ID survives `Reset()` and is sent with
+  every feature flag request, so `Reset()` does not fully unlink the device. In
+  Direct Boot, before the first unlock, both stay in memory until storage can be
+  read.
 - It records the app version name and code, which are used to classify later
   launches as installs or updates.
 - It starts a session ID in memory and the event queue. The queue flushes every
@@ -115,7 +117,9 @@ integrations, and persists the choice. It does **not**:
 - delete data on the server (use PostHog person deletion for that).
 
 To also detach the identity, call `Reset()` after `OptOut()`. It keeps the
-opt-out, but it sends one flag reload under the new anonymous ID.
+opt-out, but it sends one flag reload under the new anonymous ID, still carrying
+the unchanged device ID (the first anonymous ID). Only uninstalling the app or
+clearing its data removes the device ID.
 
 ## Reset caveat
 
