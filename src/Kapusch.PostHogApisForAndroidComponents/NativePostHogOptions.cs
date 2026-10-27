@@ -10,7 +10,9 @@ public sealed class NativePostHogOptions
     public bool CaptureLifecycle { get; init; } = true;
 
     /// <summary>
-    /// Starts the SDK opted out: nothing is captured or sent until <see cref="NativePostHog.OptIn"/>.
+    /// Starts the SDK opted out: nothing new is captured until <see cref="NativePostHog.OptIn"/>.
+    /// Some requests are not gated (events queued by earlier launches, and a feature flag request
+    /// on <see cref="NativePostHog.Identify"/>/<see cref="NativePostHog.Reset"/>); see Docs/Consent.md.
     /// Default: false (upstream default, capture enabled). When <see cref="PersistOptOut"/> is true,
     /// a runtime <see cref="NativePostHog.OptIn"/>/<see cref="NativePostHog.OptOut"/> choice stored by
     /// an earlier launch takes precedence over this value.
