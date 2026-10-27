@@ -15,6 +15,8 @@
   <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.10.0.1"/>
   <PackageReference Include="GoogleGson" Version="2.13.1.1"/>
   <PackageReference Include="Square.OkHttp3" Version="4.12.0.7"/>
+  <!-- PostHog core 6.47.x requires Okio 3.11.0+ (gzip body fix); OkHttp 4.12.0.7 alone brings 3.9.1. -->
+  <PackageReference Include="Square.OkIO" Version="3.16.4.2"/>
   <None Include="buildTransitive/**" Pack="true" PackagePath="buildTransitive/"/>
   <None Include="nuget-readme.md" Pack="true" PackagePath="/"/>
   <None Include="../../THIRD_PARTY_NOTICES.md" Pack="true" PackagePath="/"/>
@@ -24,6 +26,6 @@
  </ItemGroup>
  <Target Name="ValidateNativeAssets" BeforeTargets="GenerateNuspec">
   <Error Condition="!Exists('Native/Android/build/aar/kposthog-release.aar')" Text="Build native wrapper before packing."/>
-  <Error Condition="!Exists('Native/Android/build/deps/posthog-6.8.1.jar')" Text="Missing pinned native SDK dependencies."/>
+  <Error Condition="!Exists('Native/Android/build/deps/posthog-6.47.7.jar')" Text="Missing pinned native SDK dependencies."/>
  </Target>
 </Project>
