@@ -75,6 +75,8 @@ for this repository and workflow `publish.yml`, using the NuGet profile `Kapusch
 The job uses GitHub OIDC through `NuGet/login@v1`; no permanent API key is required
 scoped to this package on NuGet.org. Run Publish verified NuGet package on main.
 The workflow rebuilds, scans, packs and links a consumer before publishing the
-version declared in the project. Never overwrite a published version; increment
-the project and sample versions for subsequent releases. No publication runs
-automatically on push. Device qualification remains a human-reviewed prerequisite.
+version declared in the project. There are no release tags: the project's
+`VersionPrefix`/`VersionSuffix` is the release version, currently
+`1.0.0-rc.1` (published 0.1.1 before). Never overwrite a published version;
+increment the project and sample versions for subsequent releases, and remove
+`VersionSuffix` for the final 1.0.0. No publication runs automatically on push. Device qualification remains a human-reviewed prerequisite.
