@@ -1,7 +1,8 @@
 # PostHogApisForAndroidComponents
 
 Public .NET 10 Android interop for the official PostHog mobile SDK.
-NuGet ID: **Kapusch.PostHog.Android**. Version 0.1.0 is a qualification build.
+NuGet ID: **Kapusch.PostHog.Android**. The next release is 1.0.0-rc.1 (the
+version declared in the project; see [manual publication](Docs/Qualification.md#manual-publication)).
 
 The thin wrapper exposes setup, identify/reset, capture, flush, distinct ID and
 consent: start opted out (`NativePostHogOptions.OptOut`), `OptIn()`, `OptOut()`

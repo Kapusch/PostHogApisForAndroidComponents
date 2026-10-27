@@ -1,6 +1,7 @@
 # Integration
 
-Reference `Kapusch.PostHog.Android` 0.1.0 from a .NET 10 Android application.
+Reference `Kapusch.PostHog.Android` 1.0.0-rc.1 from a .NET 10 Android
+application (Android 6.0 / API 23 or later).
 Initialize once, on the platform UI thread during startup, with a public project
 key and host. Use separate test and production projects. No secret API keys in
 apps. Capture is enabled at setup by default (upstream default); to wait for
