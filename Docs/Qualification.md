@@ -56,6 +56,18 @@ auto-arm when Firebase Messaging is present; the wrapper turns both off.
 Device runtime requalification (identity, offline restart, opt-out) is still
 required before claiming support for this SDK version.
 
+## Consent runtime check — 2026-10-27
+
+Android 16 (API 36) emulator, packed Release sample linked with R8, loopback
+endpoint. When the SDK starts with `OptOut = true`, `IsOptOut` is true and
+`Capture` is dropped ("PostHog is in OptOut state."). It makes no remote config
+request. After `OptIn()`, `Application Opened` is queued, but
+`Application Installed` is not, because the first launch started opted out.
+Only `/batch` is contacted. A scratch app using `OptOut = false` and
+`PersistOptOut = true` called `OptOut()` and then `Reset()`. The next launch
+started opted out and had a new anonymous ID. A later `OptIn()` also persisted
+across a relaunch.
+
 ## Manual publication
 
 After device qualification, configure a NuGet.org Trusted Publishing policy
