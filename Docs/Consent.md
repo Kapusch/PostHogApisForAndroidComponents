@@ -16,9 +16,10 @@ The existing `Configure(context, key, host, debug, captureLifecycle)` overload
 is kept and uses the defaults.
 
 **Default.** `OptOut` defaults to `false`, the upstream default. Capture is
-enabled at setup, so apps upgrading from 0.1.x see no behavior change. Whether
-prior consent is legally required is the app's decision. Apps that need it must
-pass `OptOut = true`.
+enabled at setup, so for apps upgrading from 0.1.x capture stays enabled by
+default. Other things do change in 1.0.0; see the [changelog](../CHANGELOG.md).
+Whether prior consent is legally required is the app's decision. Apps that need
+it must pass `OptOut = true`.
 
 ## First launch, before any other call
 

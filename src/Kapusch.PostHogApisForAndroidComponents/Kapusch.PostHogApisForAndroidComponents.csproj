@@ -6,6 +6,7 @@
   <!-- Publishes 1.0.0-rc.1; drop VersionSuffix for the final 1.0.0. -->
   <VersionPrefix>1.0.0</VersionPrefix><VersionSuffix>rc.1</VersionSuffix><Description>Thin JNI interop for the official PostHog Android SDK with native disk persistence.</Description>
   <PackageLicenseExpression>MIT</PackageLicenseExpression><RepositoryUrl>https://github.com/Kapusch/PostHogApisForAndroidComponents</RepositoryUrl>
+  <PackageReleaseNotes>Native SDK PostHog Android 3.73.1. Breaking: minimum Android API 23 (was 21). Reset() now keeps an active opt-out across launches; a persisted opt-in is still cleared, so call OptIn() again after Reset(). No remote config request at setup. New direct dependency Square.OkIO 3.16.4.2. Added NativePostHogOptions (OptOut, PersistOptOut), IsOptOut. Capture stays enabled by default. Full notes: https://github.com/Kapusch/PostHogApisForAndroidComponents/blob/main/CHANGELOG.md</PackageReleaseNotes>
   <PackageReadmeFile>nuget-readme.md</PackageReadmeFile><NoWarn>$(NoWarn);NU5128</NoWarn>
  </PropertyGroup>
  <ItemGroup>
