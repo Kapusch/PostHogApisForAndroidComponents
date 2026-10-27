@@ -124,6 +124,10 @@ public static class NativePostHog
 
     /// <summary>
     /// Clears the identity (new anonymous ID). An active opt-out is kept, including across launches.
+    /// A persisted opt-in is not: the running process stays opted in, but the next launch falls back
+    /// to <see cref="NativePostHogOptions.OptOut"/>. Apps that start opted out must keep their own
+    /// consent record and call <see cref="OptIn"/> again after every Reset (or on every launch while
+    /// consent stands). See Docs/Consent.md.
     /// </summary>
     public static void Reset() => Call("reset");
 
