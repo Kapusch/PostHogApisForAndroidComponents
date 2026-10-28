@@ -10,17 +10,36 @@ public static class NativePostHog
         "com/kapusch/posthog/androidinterop/PostHogInterop"
     );
 
+    /// <summary>Configures the SDK with default options (capture enabled, upstream default).</summary>
     public static void Configure(
         Context context,
         string projectKey,
         string host,
         bool debug = false,
         bool captureLifecycle = true
+    ) =>
+        Configure(
+            context,
+            projectKey,
+            host,
+            new NativePostHogOptions { Debug = debug, CaptureLifecycle = captureLifecycle }
+        );
+
+    /// <summary>
+    /// Configures the process-wide SDK once. Use <see cref="NativePostHogOptions.OptOut"/> to start
+    /// without capturing until consent is given.
+    /// </summary>
+    public static void Configure(
+        Context context,
+        string projectKey,
+        string host,
+        NativePostHogOptions options
     )
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentException.ThrowIfNullOrWhiteSpace(projectKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(host);
+        ArgumentNullException.ThrowIfNull(options);
         var key = JNIEnv.NewString(projectKey);
         var endpoint = JNIEnv.NewString(host);
         try
@@ -30,13 +49,15 @@ public static class NativePostHog
                 JNIEnv.GetStaticMethodID(
                     Class,
                     "setup",
-                    "(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ZZ)V"
+                    "(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ZZZZ)V"
                 ),
                 new JValue(context),
                 new JValue(key),
                 new JValue(endpoint),
-                new JValue(debug),
-                new JValue(captureLifecycle)
+                new JValue(options.Debug),
+                new JValue(options.CaptureLifecycle),
+                new JValue(options.OptOut),
+                new JValue(options.PersistOptOut)
             );
         }
         finally
@@ -101,11 +122,27 @@ public static class NativePostHog
     private static void Call(string name) =>
         JNIEnv.CallStaticVoidMethod(Class, JNIEnv.GetStaticMethodID(Class, name, "()V"));
 
+    /// <summary>
+    /// Clears the identity (new anonymous ID). An active opt-out is kept, including across launches.
+    /// A persisted opt-in is not: the running process stays opted in, but the next launch falls back
+    /// to <see cref="NativePostHogOptions.OptOut"/>. Apps that start opted out must keep their own
+    /// consent record and call <see cref="OptIn"/> again after every Reset (or on every launch while
+    /// consent stands). See Docs/Consent.md.
+    /// </summary>
     public static void Reset() => Call("reset");
 
     public static void Flush() => Call("flush");
 
+    /// <summary>Enables capture (consent given). Persisted unless PersistOptOut is false.</summary>
     public static void OptIn() => Call("optIn");
 
+    /// <summary>
+    /// Stops capture (consent withdrawn). Persisted unless PersistOptOut is false. Events already
+    /// queued before this call are not purged and may still be sent.
+    /// </summary>
     public static void OptOut() => Call("optOut");
+
+    /// <summary>True when capture is disabled, including before <see cref="Configure(Context, string, string, NativePostHogOptions)"/>.</summary>
+    public static bool IsOptOut =>
+        JNIEnv.CallStaticBooleanMethod(Class, JNIEnv.GetStaticMethodID(Class, "isOptOut", "()Z"));
 }

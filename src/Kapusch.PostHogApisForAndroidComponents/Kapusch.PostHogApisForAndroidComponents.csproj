@@ -3,8 +3,10 @@
   <TargetFramework>net10.0-android</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
   <DefaultItemExcludes>$(DefaultItemExcludes);Native/**</DefaultItemExcludes>
   <PackageId>Kapusch.PostHog.Android</PackageId><AssemblyName>Kapusch.PostHog.Android</AssemblyName><Authors>Kapusch</Authors>
-  <Version>0.1.1</Version><Description>Thin JNI interop for the official PostHog Android SDK with native disk persistence.</Description>
+  <!-- Publishes 1.0.0-rc.1; drop VersionSuffix for the final 1.0.0. -->
+  <VersionPrefix>1.0.0</VersionPrefix><VersionSuffix>rc.1</VersionSuffix><Description>Thin JNI interop for the official PostHog Android SDK with native disk persistence.</Description>
   <PackageLicenseExpression>MIT</PackageLicenseExpression><RepositoryUrl>https://github.com/Kapusch/PostHogApisForAndroidComponents</RepositoryUrl>
+  <PackageReleaseNotes>Native SDK PostHog Android 3.73.1. Breaking: minimum Android API 23 (was 21). Reset() now keeps an active opt-out across launches; a persisted opt-in is still cleared, so call OptIn() again after Reset(). No remote config request at setup. New direct dependency Square.OkIO 3.16.4.2. Added NativePostHogOptions (OptOut, PersistOptOut), IsOptOut. Capture stays enabled by default. Full notes: https://github.com/Kapusch/PostHogApisForAndroidComponents/blob/main/CHANGELOG.md</PackageReleaseNotes>
   <PackageReadmeFile>nuget-readme.md</PackageReadmeFile><NoWarn>$(NoWarn);NU5128</NoWarn>
  </PropertyGroup>
  <ItemGroup>
@@ -15,6 +17,8 @@
   <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.10.0.1"/>
   <PackageReference Include="GoogleGson" Version="2.13.1.1"/>
   <PackageReference Include="Square.OkHttp3" Version="4.12.0.7"/>
+  <!-- PostHog core 6.47.x requires Okio 3.11.0+ (gzip body fix); OkHttp 4.12.0.7 alone brings 3.9.1. -->
+  <PackageReference Include="Square.OkIO" Version="3.16.4.2"/>
   <None Include="buildTransitive/**" Pack="true" PackagePath="buildTransitive/"/>
   <None Include="nuget-readme.md" Pack="true" PackagePath="/"/>
   <None Include="../../THIRD_PARTY_NOTICES.md" Pack="true" PackagePath="/"/>
@@ -24,6 +28,6 @@
  </ItemGroup>
  <Target Name="ValidateNativeAssets" BeforeTargets="GenerateNuspec">
   <Error Condition="!Exists('Native/Android/build/aar/kposthog-release.aar')" Text="Build native wrapper before packing."/>
-  <Error Condition="!Exists('Native/Android/build/deps/posthog-6.8.1.jar')" Text="Missing pinned native SDK dependencies."/>
+  <Error Condition="!Exists('Native/Android/build/deps/posthog-6.47.7.jar')" Text="Missing pinned native SDK dependencies."/>
  </Target>
 </Project>
