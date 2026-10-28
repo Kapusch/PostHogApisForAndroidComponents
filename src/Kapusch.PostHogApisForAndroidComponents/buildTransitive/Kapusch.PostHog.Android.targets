@@ -10,5 +10,7 @@
  <Target Name="ValidatePostHogAndroidConsumer" BeforeTargets="_ResolveLibraryProjectImports" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
   <Error Condition="!Exists('$(_KapuschPostHogNativeRoot)/aar/kposthog-release.aar')" Text="Missing PostHog native wrapper."/>
   <Error Condition="!Exists('$(_KapuschPostHogNativeRoot)/deps/posthog-6.47.7.jar')" Text="Missing pinned PostHog native SDK."/>
+  <!-- The bundled SDK declares minSdkVersion 23; fail with a clear message instead of a manifest merge error. -->
+  <Error Condition="'$(AndroidApplication)' == 'true' And '$(SupportedOSPlatformVersion)' != '' And $([MSBuild]::VersionLessThan('$(SupportedOSPlatformVersion)', '23.0'))" Text="Kapusch.PostHog.Android requires Android API 23 or later. Set SupportedOSPlatformVersion to 23.0 or higher (current: $(SupportedOSPlatformVersion))."/>
  </Target>
 </Project>

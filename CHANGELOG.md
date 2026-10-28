@@ -7,7 +7,8 @@ Native SDK: PostHog Android 3.73.1 / core 6.47.7 (was 3.38.2 / 6.8.1).
 ### Breaking or behavior changes
 
 - **Minimum Android version is API 23** (Android 6.0), up from API 21,
-  following the upstream SDK. Apps on API 21/22 fail at build time.
+  following the upstream SDK. An app whose `SupportedOSPlatformVersion` is
+  below 23 fails at build time with an explicit error.
 - **`Reset()` keeps an active opt-out across launches.** Upstream `reset()`
   erases the persisted opt-out; the wrapper re-applies it. A persisted opt-in is
   still erased: apps that start opted out must call `OptIn()` again after every
