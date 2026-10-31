@@ -9,3 +9,14 @@ private term read at run time from the KAPUSCH_PRIVATE_TERMS environment variabl
 .git/info/private-terms file (one term per line or comma-separated). Private
 terms are never tracked; failures name the file and the term's position only.
 The private-term check is skipped with a notice when no term is configured.
+
+## Pull requests
+
+- Keep PRs focused and well-scoped; use the pull request template checklist.
+- Branch from `main` and target `main`; this repository does not use long-lived `release/*` branches.
+- Follow `.editorconfig` for formatting.
+- Do not commit secrets or real project keys.
+
+See `Docs/Release.md` before changing versions, tags, or publishing workflows.
+
+By contributing, you agree that your contributions will be licensed under the repository license (MIT). Participation is covered by the [Code of Conduct](CODE_OF_CONDUCT.md).
