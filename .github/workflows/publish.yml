@@ -1,17 +1,84 @@
-name: Publish verified NuGet package
+name: publish
+
 on:
   workflow_dispatch:
+    inputs:
+      manual_version:
+        description: 'Force a specific version for NuGet.org publish (e.g., 1.0.0 or 1.0.0-rc.1). If empty, defaults to auto-generated preview for GitHub Packages.'
+        required: false
+        type: string
+  push:
+    tags:
+      - "v*"
+
 permissions:
   contents: read
+  packages: write
+
 jobs:
   publish:
-    if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
+      packages: write
       id-token: write
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine package version
+        id: version
+        shell: bash
+        env:
+          REF: ${{ github.ref }}
+          SHA: ${{ github.sha }}
+          MANUAL_VERSION: ${{ github.event.inputs.manual_version }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          CSPROJ="src/Kapusch.PostHogApisForAndroidComponents/Kapusch.PostHogApisForAndroidComponents.csproj"
+          BASE_VERSION=$(grep -oE '<VersionPrefix>[^<]+' "$CSPROJ" | head -n 1 | sed 's/<VersionPrefix>//')
+          if [[ -z "$BASE_VERSION" ]]; then
+            echo "ERROR: VersionPrefix not found in $CSPROJ."
+            exit 1
+          fi
+
+          if [[ -n "$MANUAL_VERSION" ]]; then
+            VERSION="$MANUAL_VERSION"
+            PUBLISH_TARGET="nuget"
+            echo "Manual version provided ($VERSION). Triggering NuGet.org publish."
+          elif [[ "$REF" =~ ^refs/tags/v ]]; then
+            VERSION="${REF#refs/tags/v}"
+            PUBLISH_TARGET="nuget"
+          else
+            COMMIT_SHORT=$(git rev-parse --short HEAD)
+            VERSION="${BASE_VERSION}-preview.${RUN_NUMBER}.${COMMIT_SHORT}"
+            PUBLISH_TARGET="github"
+          fi
+
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "ERROR: '$VERSION' is not a valid NuGet version."
+            exit 1
+          fi
+
+          if [[ "$PUBLISH_TARGET" == "nuget" ]]; then
+            git fetch origin "+refs/heads/main:refs/remotes/origin/main"
+            if ! git merge-base --is-ancestor "$SHA" origin/main; then
+              echo "ERROR: NuGet.org releases must be reachable from origin/main."
+              exit 1
+            fi
+            if [[ -n "$MANUAL_VERSION" && "$REF" != "refs/heads/main" ]]; then
+              echo "ERROR: Manual NuGet.org releases must be dispatched from main."
+              exit 1
+            fi
+          fi
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "publish_target=${PUBLISH_TARGET}" >> "$GITHUB_OUTPUT"
+          echo "Package version: ${VERSION}"
+          echo "Publish target: ${PUBLISH_TARGET}"
+
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
@@ -25,20 +92,49 @@ jobs:
           KAPUSCH_PRIVATE_TERMS: ${{ secrets.KAPUSCH_PRIVATE_TERMS }}
         run: python3 scripts/verify-public.py
       - run: bash src/Kapusch.PostHogApisForAndroidComponents/Native/Android/build.sh
-      - run: dotnet pack src/Kapusch.PostHogApisForAndroidComponents/Kapusch.PostHogApisForAndroidComponents.csproj -c Release -o artifacts/nuget
+      - name: Pack
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: dotnet pack src/Kapusch.PostHogApisForAndroidComponents/Kapusch.PostHogApisForAndroidComponents.csproj -c Release -o artifacts/nuget -p:PackageVersion="$VERSION"
+      - name: Align the sample reference with the packed version
+        # The sample restores the packed package by exact version, and tag, manual and
+        # preview versions can differ from the declared one. This edits the CI checkout only.
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          sed -E -i.bak "s#(Include=\"Kapusch\.PostHog\.Android\" Version=\")[^\"]*#\1${VERSION}#" samples/Smoke/Smoke.csproj
+          rm samples/Smoke/Smoke.csproj.bak
+          grep -q "Include=\"Kapusch.PostHog.Android\" Version=\"${VERSION}\"" samples/Smoke/Smoke.csproj
       - run: python3 scripts/verify-package.py
       - run: dotnet build samples/Smoke/Smoke.csproj -c Release
       - uses: actions/upload-artifact@v4
         with:
           name: native-sdk-qualification
           path: artifacts/nuget/*.nupkg
+
       - name: Authenticate to NuGet.org with OIDC
+        if: steps.version.outputs.publish_target == 'nuget'
         uses: NuGet/login@v1
         id: nuget_login
         with:
-          user: Kapusch
-      - name: Publish to NuGet.org
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to NuGet.org
+        if: steps.version.outputs.publish_target == 'nuget'
         env:
           NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
         run: |
-          dotnet nuget push artifacts/nuget/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+          dotnet nuget push artifacts/nuget/*.nupkg \
+            --api-key "$NUGET_API_KEY" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --skip-duplicate
+
+      - name: Push to GitHub Packages
+        if: steps.version.outputs.publish_target == 'github'
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget push artifacts/nuget/*.nupkg \
+            --api-key "$NUGET_AUTH_TOKEN" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --skip-duplicate
